@@ -1,5 +1,7 @@
 from flask import Flask
+from mongoengine import connect
 from app.routes import route_blueprints as rb
+from env import DatabaseEnv as db
 
 
 def create_flask_app(blueprints: list = rb):
@@ -11,6 +13,12 @@ def create_flask_app(blueprints: list = rb):
         app.register_blueprint(blueprint[1], url_prefix=blueprint[0])
 
     return app
+
+
+def connect_db():
+    """Connects to the database with env specified keys"""
+    connect(db.DB, host=db.HOST, port=db.PORT)
+    print("Mongo database connected!")
 
 
 # create the flask application
