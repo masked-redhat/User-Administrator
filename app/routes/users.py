@@ -30,7 +30,8 @@ def get_user(id: str):
     except NoUserError:  # when no user found
         return SendResponse.bad("Invalid Id, no user found")
 
-    except:
+    except Exception as e:
+        print(e)
         return SendResponse.server_error()
 
 
@@ -52,6 +53,7 @@ def create_user():
             # only email is unique, so easy to do here
             return SendResponse.bad("Email is already used", 409)
 
+        print(e)
         return SendResponse.server_error()
 
 
@@ -71,7 +73,8 @@ def update_user(id: str):
     except NoUserError:  # when no user found
         return SendResponse.bad("Invalid Id, no user found")
 
-    except:
+    except Exception as e:
+        print(e)
         return SendResponse.server_error()
 
 
@@ -84,5 +87,6 @@ def delete_user(id: str):
     except NoUserError:  # when no user found
         return SendResponse.bad("Invalid Id, no user found")
 
-    except:
+    except Exception as e:
+        print(e)
         return SendResponse.server_error()
