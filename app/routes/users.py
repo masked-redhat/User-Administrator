@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from app.services.user_service import UserService
+from app.services.user_service import UserService, NoUserError
 from app.utils.request import ReqBody
 from app.utils.response import SendResponse
 from mongoengine import ValidationError
@@ -20,17 +20,14 @@ def get_users():
     return SendResponse.ok("Got users for you", {'users': users})
 
 
-@users_blueprint.route("/<id>", methods=['GET'])
-def get_user(id):
+@users_blueprint.route("/<string:id>", methods=['GET'])
+def get_user(id: str):
     try:
         user = UserService.get_user_by_id(id)
         user = ReqBody.convert(user, users_fields)  # convert user to dict
         return SendResponse.ok(f'User {id}', {'user': user})
 
-    except TypeError:  # when id is not of type string
-        return SendResponse.bad("Invalid Id, Id should be string")
-
-    except AttributeError:  # when no user found
+    except NoUserError:  # when no user found
         return SendResponse.bad("Invalid Id, no user found")
 
     except:
@@ -58,34 +55,33 @@ def create_user():
         return SendResponse.server_error()
 
 
-@users_blueprint.route("/<id>", methods=['PUT'])
-def update_user(id):
+@users_blueprint.route("/<string:id>", methods=['PUT'])
+def update_user(id: str):
     try:
         data = ReqBody.convert(request.get_json(), users_fields)
         user = UserService.update_user(id, data)  # update user
 
         # updated user with 'id' field
-        user = ReqBody.convert(user, users_fields+['id'])
+        user = ReqBody.convert(user, [*users_fields, 'id'])
         return SendResponse.ok("User updated", {'user': user})  # w/ new values
 
     except ValidationError as e:
-        print(e)
         return SendResponse.bad("Invalid values")
+
+    except NoUserError:  # when no user found
+        return SendResponse.bad("Invalid Id, no user found")
 
     except:
         return SendResponse.server_error()
 
 
-@users_blueprint.route("/<id>", methods=['DELETE'])
-def delete_user(id):
+@users_blueprint.route("/<string:id>", methods=['DELETE'])
+def delete_user(id: str):
     try:
         UserService.delete_user(id)
         return SendResponse.no_content()
 
-    except TypeError:  # when id is not of type string
-        return SendResponse.bad("Invalid Id, Id should be string")
-
-    except AttributeError:  # when no user found
+    except NoUserError:  # when no user found
         return SendResponse.bad("Invalid Id, no user found")
 
     except:

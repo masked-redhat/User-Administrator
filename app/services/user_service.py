@@ -1,6 +1,11 @@
 from app.models.User import User
 
 
+class NoUserError:
+    """Custom error when no user found"""
+    pass
+
+
 class UserService:
     @staticmethod
     def get_users():
@@ -9,12 +14,10 @@ class UserService:
 
     @staticmethod
     def get_user_by_id(id):
-        if (type(id) != 'string'):
-            raise TypeError(f"Invalid id : ${id}")
+        user = User.objects(id=str(id)).first()  # id is in string
 
-        user = User.objects(id=id).first()
         if (user == None):
-            raise AttributeError(f"No user found with id ${id}")
+            raise NoUserError
 
         return user
 
@@ -27,8 +30,11 @@ class UserService:
 
     @staticmethod
     def update_user(id, data={}):
-        user = User.objects(id=id).first()
-        
+        user = User.objects(id=str(id)).first()
+
+        if (user == None):
+            raise NoUserError
+
         # set new values in the user
         for key, val in data.items():
             setattr(user, key, val)
@@ -38,11 +44,9 @@ class UserService:
 
     @staticmethod
     def delete_user(id):
-        if (type(id) != 'string'):
-            raise TypeError(f"Invalid id : ${id}")
-
-        user = User.objects(id=id).first()
+        user = User.objects(id=str(id)).first()
+        
         if (user == None):
-            raise AttributeError(f"No user found with id ${id}")
+            raise NoUserError
 
         user.delete()
