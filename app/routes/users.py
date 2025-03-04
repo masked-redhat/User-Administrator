@@ -1,6 +1,8 @@
 from flask import Blueprint, request
 from app.services.user_service import UserService
 from app.utils.request import ReqBody
+from app.utils.response import SendResponse
+from mongoengine import ValidationError
 
 users_blueprint = Blueprint('users_blueprint', __name__)
 
@@ -11,39 +13,80 @@ users_fields = ['name', 'email', 'password']
 def get_users():
     users = UserService.get_users()
 
-    _users = []
-    for user in users:
-        _users.append(ReqBody(user, users_fields+["id"]).values)
+    # convert the users from 'User object' type to a dict
+    users = list(map(lambda user: ReqBody.convert(
+        user, users_fields+["id"]), users))
 
-    return _users
+    return SendResponse.ok("Got users for you", {'users': users})
 
 
 @users_blueprint.route("/<id>", methods=['GET'])
 def get_user(id):
-    user = UserService.get_user_by_id(id)
+    try:
+        user = UserService.get_user_by_id(id)
+        user = ReqBody.convert(user, users_fields)  # convert user to dict
+        return SendResponse.ok(f'User {id}', {'user': user})
 
-    return ReqBody(user, users_fields+["id"]).values
+    except TypeError:  # when id is not of type string
+        return SendResponse.bad("Invalid Id, Id should be string")
+
+    except AttributeError:  # when no user found
+        return SendResponse.bad("Invalid Id, no user found")
+
+    except:
+        return SendResponse.server_error()
 
 
 @users_blueprint.route("/", methods=['POST'])
 def create_user():
-    data = ReqBody(request.get_json(), users_fields)
-    if (data.some_none() == True):
-        return "Some fields not given"
-    id = UserService.create_user(data.values)
-    return {
-        'id': id
-    }
+    try:
+        data = ReqBody(request.get_json(), users_fields)
+        if (data.some_none() == True):  # any field missing or value not given
+            return SendResponse.bad("Some fields not given")
+
+        id = UserService.create_user(data.values)
+        return SendResponse.created("User created", {'id': id})
+
+    except ValidationError as e:
+        return SendResponse.bad("Invalid values")
+
+    except Exception as e:
+        if (str(e).find("duplicate") != -1):
+            # only email is unique, so easy to do here
+            return SendResponse.bad("Email is already used", 409)
+
+        return SendResponse.server_error()
 
 
 @users_blueprint.route("/<id>", methods=['PUT'])
 def update_user(id):
-    data = ReqBody(request.get_json(), users_fields)
-    user = UserService.update_user(id, data.values)
-    return ReqBody(user, users_fields+['id']).values
+    try:
+        data = ReqBody.convert(request.get_json(), users_fields)
+        user = UserService.update_user(id, data)  # update user
+
+        # updated user with 'id' field
+        user = ReqBody.convert(user, users_fields+['id'])
+        return SendResponse.ok("User updated", {'user': user})  # w/ new values
+
+    except ValidationError as e:
+        print(e)
+        return SendResponse.bad("Invalid values")
+
+    except:
+        return SendResponse.server_error()
 
 
 @users_blueprint.route("/<id>", methods=['DELETE'])
 def delete_user(id):
-    UserService.delete_user(id)
-    return "Deleted"
+    try:
+        UserService.delete_user(id)
+        return SendResponse.no_content()
+
+    except TypeError:  # when id is not of type string
+        return SendResponse.bad("Invalid Id, Id should be string")
+
+    except AttributeError:  # when no user found
+        return SendResponse.bad("Invalid Id, no user found")
+
+    except:
+        return SendResponse.server_error()
