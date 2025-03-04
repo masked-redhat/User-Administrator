@@ -149,7 +149,6 @@ docker compose up
 
 1. Open Postman and create a new HTTP request for each endpoint.
 2. Send requests to the endpoints to test CRUD operations.
-3. Verify that the responses are correct and the database is updated.
 
 ## Docker Setup
 
