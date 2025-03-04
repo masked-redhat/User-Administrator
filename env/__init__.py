@@ -1,25 +1,23 @@
-from app.utils import load_env
-
-# file to search for env variables
-env_file = ".env"
+from dotenv import load_dotenv
+import os
 
 # load env variables
-env_vars = load_env(env_file)
+load_dotenv()
 
 
 class ServerEnv:
-    PORT = int(env_vars.get('PORT', '5000'))
-    HOST = env_vars.get('HOST', 'localhost')
+    PORT = int(os.getenv('PORT', '5000'))
+    HOST = os.getenv('HOST', 'localhost')
 
 
 class DatabaseEnv:
-    HOST = env_vars.get('MONGO_HOST', '127.0.0.1')
-    PORT = int(env_vars.get('MONGO_PORT', '27017'))
-    DB = env_vars.get('MONGO_DATABASE')
-    USER = env_vars.get('MONGO_USER')
-    PASSWORD = env_vars.get('MONGO_PASS')
+    HOST = os.getenv('MONGO_HOST', '127.0.0.1')
+    PORT = int(os.getenv('MONGO_PORT', '27017'))
+    DB = os.getenv('MONGO_DATABASE')
+    USER = os.getenv('MONGO_USER')
+    PASSWORD = os.getenv('MONGO_PASS')
     CONN = "users_db_connection"
 
 
 class SystemEnv:
-    ENV = env_vars.get('ENV', 'dev')  # if set to 'prod', debug = False
+    ENV = os.getenv('ENV', 'dev')  # if set to 'prod', debug = False
