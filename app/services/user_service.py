@@ -1,7 +1,7 @@
 from app.models.User import User
 
 
-class NoUserError:
+class NoUserError(Exception):
     """Custom error when no user found"""
     pass
 
@@ -45,7 +45,7 @@ class UserService:
     @staticmethod
     def delete_user(id):
         user = User.objects(id=str(id)).first()
-        
+
         if (user == None):
             raise NoUserError
 
