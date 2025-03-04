@@ -1,0 +1,11 @@
+# env files
+.env
+
+# docker files
+Dockerfile
+docker-compose.yml
+
+# temp files (personal)
+extract.py
+*code.txt
+trash
