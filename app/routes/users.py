@@ -44,7 +44,7 @@ def create_user():
             return SendResponse.bad("Some fields not given")
 
         # validate email or raise exception
-        validate_email(data['email'])
+        validate_email(data.get('email'))
 
         id = UserService.create_user(data.values)
         return SendResponse.created("User created", {'id': id})
