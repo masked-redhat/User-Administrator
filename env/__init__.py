@@ -22,4 +22,4 @@ class DatabaseEnv:
 
 
 class SystemEnv:
-    ENV = "dev"  # if set to 'prod', debug = False
+    ENV = env_vars.get('ENV', 'dev')  # if set to 'prod', debug = False
