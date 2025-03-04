@@ -1,5 +1,5 @@
 class ReqBody:
-    """A convinient way to handle request body"""
+    """A convenient way to handle request body"""
 
     def __init__(self, data, fields: list[str] = []):
         self.values = self.convert(data, fields)
