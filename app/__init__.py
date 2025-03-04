@@ -8,7 +8,7 @@ def create_flask_app(blueprints: list = rb):
 
     # register blueprints
     for blueprint in blueprints:
-        app.register_blueprint(blueprint)
+        app.register_blueprint(blueprint[1], url_prefix=blueprint[0])
 
     return app
 
