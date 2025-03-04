@@ -19,3 +19,5 @@ build/
 
 # temp files (for myself)
 trash
+extract.py
+*.txt
