@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from app.services.user_service import UserService, NoUserError
+from app.services.user_service import UserService, NoUserError, InvalidIdError
 from app.utils.request import ReqBody
 from app.utils.response import SendResponse
 from mongoengine import ValidationError
@@ -30,6 +30,9 @@ def get_user(id: str):
 
     except NoUserError:  # when no user found
         return SendResponse.bad("Invalid Id, no user found")
+
+    except InvalidIdError:
+        return SendResponse.bad("Invalid Id, please check again")
 
     except Exception as e:
         print(e)
@@ -80,6 +83,9 @@ def update_user(id: str):
     except ValidationError as e:
         return SendResponse.bad("Invalid values")
 
+    except InvalidIdError:
+        return SendResponse.bad("Invalid Id, please check again")
+
     except EmailNotValidError:
         return SendResponse.bad("Invalid email")
 
@@ -99,6 +105,9 @@ def delete_user(id: str):
 
     except NoUserError:  # when no user found
         return SendResponse.bad("Invalid Id, no user found")
+
+    except InvalidIdError:
+        return SendResponse.bad("Invalid Id, please check again")
 
     except Exception as e:
         print(e)
