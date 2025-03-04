@@ -6,7 +6,7 @@ from mongoengine import ValidationError
 
 users_blueprint = Blueprint('users_blueprint', __name__)
 
-users_fields = ['name', 'email', 'password']
+user_fields = ['name', 'email', 'password']
 
 
 @users_blueprint.route("/", methods=['GET'])
@@ -15,7 +15,7 @@ def get_users():
 
     # convert the users from 'User object' type to a dict
     users = list(map(lambda user: ReqBody.convert(
-        user, users_fields+["id"]), users))
+        user, user_fields+["id"]), users))
 
     return SendResponse.ok("Got users for you", {'users': users})
 
@@ -24,7 +24,7 @@ def get_users():
 def get_user(id: str):
     try:
         user = UserService.get_user_by_id(id)
-        user = ReqBody.convert(user, users_fields)  # convert user to dict
+        user = ReqBody.convert(user, user_fields)  # convert user to dict
         return SendResponse.ok(f'User {id}', {'user': user})
 
     except NoUserError:  # when no user found
@@ -38,7 +38,7 @@ def get_user(id: str):
 @users_blueprint.route("/", methods=['POST'])
 def create_user():
     try:
-        data = ReqBody(request.get_json(), users_fields)
+        data = ReqBody(request.get_json(), user_fields)
         if (data.some_none() == True):  # any field missing or value not given
             return SendResponse.bad("Some fields not given")
 
@@ -60,11 +60,11 @@ def create_user():
 @users_blueprint.route("/<string:id>", methods=['PUT'])
 def update_user(id: str):
     try:
-        data = ReqBody.convert(request.get_json(), users_fields)
+        data = ReqBody.convert(request.get_json(), user_fields)
         user = UserService.update_user(id, data)  # update user
 
         # updated user with 'id' field
-        user = ReqBody.convert(user, [*users_fields, 'id'])
+        user = ReqBody.convert(user, [*user_fields, 'id'])
         return SendResponse.ok("User updated", {'user': user})  # w/ new values
 
     except ValidationError as e:
