@@ -4,6 +4,9 @@ class ReqBody:
     def __init__(self, data, fields: list[str] = []):
         self.values = self.convert(data, fields)
 
+    def has(self, field: str) -> bool:
+        return field in self.values
+
     def get(self, field: str, default_value=None):
         return self.values.get(field, default_value)
 

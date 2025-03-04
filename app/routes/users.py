@@ -3,6 +3,7 @@ from app.services.user_service import UserService, NoUserError
 from app.utils.request import ReqBody
 from app.utils.response import SendResponse
 from mongoengine import ValidationError
+from email_validator import validate_email, EmailNotValidError
 
 users_blueprint = Blueprint('users_blueprint', __name__)
 
@@ -42,11 +43,17 @@ def create_user():
         if (data.some_none() == True):  # any field missing or value not given
             return SendResponse.bad("Some fields not given")
 
+        # validate email or raise exception
+        validate_email(data['email'])
+
         id = UserService.create_user(data.values)
         return SendResponse.created("User created", {'id': id})
 
     except ValidationError as e:
         return SendResponse.bad("Invalid values")
+
+    except EmailNotValidError:
+        return SendResponse.bad("Invalid email")
 
     except Exception as e:
         if (str(e).find("duplicate") != -1):
@@ -60,8 +67,11 @@ def create_user():
 @users_blueprint.route("/<string:id>", methods=['PUT'])
 def update_user(id: str):
     try:
-        data = ReqBody.convert(request.get_json(), user_fields)
-        user = UserService.update_user(id, data)  # update user
+        data = ReqBody(request.get_json(), user_fields)
+        user = UserService.update_user(id, data.values)  # update user
+
+        if data.has('email'):
+            validate_email(data.get('email'))
 
         # updated user with 'id' field
         user = ReqBody.convert(user, [*user_fields, 'id'])
@@ -69,6 +79,9 @@ def update_user(id: str):
 
     except ValidationError as e:
         return SendResponse.bad("Invalid values")
+
+    except EmailNotValidError:
+        return SendResponse.bad("Invalid email")
 
     except NoUserError:  # when no user found
         return SendResponse.bad("Invalid Id, no user found")
