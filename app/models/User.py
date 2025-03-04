@@ -1,4 +1,5 @@
 from mongoengine import *
+from env import DatabaseEnv as db
 
 
 class User(Document):
@@ -8,6 +9,7 @@ class User(Document):
     password = StringField(required=True, min_length=8)
 
     meta = {
+        'db_alias': db.CONN,
         'collection': 'users',
         'indexes': [
             'email'

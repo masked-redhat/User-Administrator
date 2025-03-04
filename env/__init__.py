@@ -18,3 +18,8 @@ class DatabaseEnv:
     DB = env_vars.get('MONGO_DATABASE')
     USER = env_vars.get('MONGO_USER')
     PASSWORD = env_vars.get('MONGO_PASS')
+    CONN = "users_db_connection"
+
+
+class SystemEnv:
+    ENV = "dev"  # if set to 'prod', debug = False

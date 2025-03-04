@@ -1,5 +1,5 @@
 from flask import Flask
-from mongoengine import connect
+from mongoengine import connect, disconnect
 from app.routes import route_blueprints as rb
 from env import DatabaseEnv as db
 
@@ -17,9 +17,11 @@ def create_flask_app(blueprints: list = rb):
 
 def connect_db():
     """Connects to the database with env specified keys"""
-    connect(db.DB, host=db.HOST, port=db.PORT)
+    connect(db.DB, host=db.HOST, port=db.PORT, alias=db.CONN)
     print("Mongo database connected!")
 
 
-# create the flask application
-app = create_flask_app()
+def shutdown_db():
+    """Disconnectes the mongo connection"""
+    disconnect(db.CONN)
+    print("Mongo database shutdown")
