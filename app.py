@@ -1,6 +1,4 @@
-from app import create_flask_app, connect_db, shutdown_db
-from env import ServerEnv as _server
-from env import SystemEnv as _system
+from app import *
 
 
 def main():
@@ -11,7 +9,9 @@ def main():
     connect_db()
 
     # run the flask application
-    app.run(debug=_system.ENV == 'dev', port=_server.PORT, host=_server.HOST)
+    app.run(debug=Config.SYSTEM.ENV == 'dev',
+            port=Config.SERVER.PORT,
+            host=Config.SERVER.HOST)
 
 
 def cleanup():
@@ -25,5 +25,4 @@ if __name__ == '__main__':
     try:
         main()
     finally:
-        # clean up
         cleanup()
